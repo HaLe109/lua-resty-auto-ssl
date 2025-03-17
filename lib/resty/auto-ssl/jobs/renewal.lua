@@ -58,6 +58,7 @@ end
 local function renew_check_cert(auto_ssl_instance, storage, domain)
   -- Before issuing a cert, create a local lock to ensure multiple workers
   -- don't simultaneously try to register the same cert.
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renew_check_cert called for ", domain)
   local local_lock, new_local_lock_err = lock:new("auto_ssl", { exptime = 30, timeout = 30 })
   if new_local_lock_err then
     ngx.log(ngx.ERR, "auto-ssl: failed to create lock: ", new_local_lock_err)
@@ -193,6 +194,7 @@ end
 
 local function renew_all_domains(auto_ssl_instance)
   -- Loop through all known domains and check to see if they should be renewed.
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renew_all_domains called")
   local storage = auto_ssl_instance.storage
   local domains, domains_err = storage:all_cert_domains()
   if domains_err then
@@ -205,12 +207,14 @@ local function renew_all_domains(auto_ssl_instance)
     shuffle_table(domains)
 
     for _, domain in ipairs(domains) do
+      ngx.log(ngx.INFO, "auto-ssl-more-logs: renewing domain: ", domain)
       renew_check_cert(auto_ssl_instance, storage, domain)
     end
   end
 end
 
 local function do_renew(auto_ssl_instance)
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: do_renew called")
   -- Ensure only 1 worker executes the renewal once per interval.
   if not get_interval_lock("renew", auto_ssl_instance:get("renew_check_interval")) then
     return
@@ -225,7 +229,7 @@ local function do_renew(auto_ssl_instance)
     ngx.log(ngx.ERR, "auto-ssl: failed to obtain lock: ", lock_err)
     return
   end
-
+  ngx.log(ngx.INFO, "auto-ssl: do_renew lock obtained")
   local renew_ok, renew_err = pcall(renew_all_domains, auto_ssl_instance)
   if not renew_ok then
     ngx.log(ngx.ERR, "auto-ssl: failed to run do_renew cycle: ", renew_err)
@@ -239,9 +243,13 @@ end
 
 -- Call the renew function in an infinite loop (by default once per day).
 local function renew(premature, auto_ssl_instance)
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renewal timer called")
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: premature: ", premature)
   if premature then return end
-
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: do_renew called")
   local renew_ok, renew_err = pcall(do_renew, auto_ssl_instance)
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renew_ok: ", renew_ok)
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renew_err: ", renew_err)
   if not renew_ok then
     ngx.log(ngx.ERR, "auto-ssl: failed to run do_renew cycle: ", renew_err)
   end
@@ -261,6 +269,7 @@ function _M.spawn(auto_ssl_instance)
     ngx.log(ngx.ERR, "auto-ssl: failed to create timer: ", err)
     return
   end
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: renewal timer created")
 end
 
 return _M
