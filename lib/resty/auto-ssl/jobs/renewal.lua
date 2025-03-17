@@ -88,8 +88,14 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
     ngx.log(ngx.ERR, "auto-ssl: renewal error fetching certificate from storage for ", domain, ": ", get_cert_err)
   end
   if not cert then
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: cert not found")
     cert = {}
   end
+
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: certfullchain_pem: ", cert["fullchain_pem"])
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: certprivkey_pem: ", cert["privkey_pem"])
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: certcert_pem: ", cert["cert_pem"])
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: certexpiry: ", cert["expiry"])
 
   if not cert["fullchain_pem"] then
     ngx.log(ngx.ERR, "auto-ssl: attempting to renew certificate for domain without certificates in storage: ", domain)
@@ -134,9 +140,15 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
     end
   end
 
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: has certexpiry: ", cert["expiry"])
+
   -- If expiry date is known, attempt renewal if it's within 30 days.
   if cert["expiry"] then
     local now = ngx.now()
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: now: ", now)
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: expiry: ", cert["expiry"]) 
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60): ", now + (30 * 24 * 60 * 60))
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60) < cert[\"expiry\"]: ", now + (30 * 24 * 60 * 60) < cert["expiry"])
     if now + (30 * 24 * 60 * 60) < cert["expiry"] then
       ngx.log(ngx.NOTICE, "auto-ssl: expiry date is more than 30 days out, skipping renewal: ", domain)
       renew_check_cert_unlock(domain, storage, local_lock, distributed_lock_value)
