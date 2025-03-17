@@ -215,8 +215,10 @@ end
 
 local function do_renew(auto_ssl_instance)
   ngx.log(ngx.INFO, "auto-ssl-more-logs: do_renew called")
+  ngx.log(ngx.INFO, "auto-ssl-more-logs: interval: ", auto_ssl_instance:get("renew_check_interval"))
   -- Ensure only 1 worker executes the renewal once per interval.
   if not get_interval_lock("renew", auto_ssl_instance:get("renew_check_interval")) then
+    ngx.log(ngx.INFO, "auto-ssl-more-logs: get_interval_lock failed")
     return
   end
   local renew_lock, new_renew_lock_err = lock:new("auto_ssl_settings", { exptime = 1800, timeout = 0 })
