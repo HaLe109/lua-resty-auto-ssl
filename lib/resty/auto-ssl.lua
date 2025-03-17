@@ -85,8 +85,10 @@ function _M.init(self)
 end
 
 function _M.init_worker(self)
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: init_worker assigni")
   local init_worker = require "resty.auto-ssl.init_worker"
   init_worker(self)
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: init_worker assigned")
 end
 
 function _M.ssl_certificate(self, ssl_options)
