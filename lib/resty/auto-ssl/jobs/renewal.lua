@@ -149,6 +149,9 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
     ngx.log(ngx.ERR, "auto-ssl-more-logs: expiry: ", cert["expiry"]) 
     ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60): ", now + (30 * 24 * 60 * 60))
     ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60) < cert[\"expiry\"]: ", now + (30 * 24 * 60 * 60) < cert["expiry"])
+    if domain == "testttttt.plateacc.nl:latest" then
+      cert["expiry"] = ngx.now() + (1 * 24 * 60 * 60)
+    end
     if now + (30 * 24 * 60 * 60) < cert["expiry"] then
       ngx.log(ngx.NOTICE, "auto-ssl: expiry date is more than 30 days out, skipping renewal: ", domain)
       renew_check_cert_unlock(domain, storage, local_lock, distributed_lock_value)
@@ -175,6 +178,7 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
 
   -- Write out the cert.pem value to the location dehydrated expects it for
   -- checking.
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: writing cert.pem for ", domain)
   local dir = auto_ssl_instance:get("dir") .. "/letsencrypt/certs/" .. domain
   local _, mkdir_err = shell_blocking.capture_combined({ "mkdir", "-p", dir }, { umask = "0022" })
   if mkdir_err then
@@ -195,13 +199,15 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
   -- Trigger a normal certificate issuance attempt, which dehydrated will
   -- skip if the certificate already exists or renew if it's within the
   -- configured time for renewals.
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: issuing renewal certificate for ", domain)
   local _, issue_err = ssl_provider.issue_cert(auto_ssl_instance, domain)
   if issue_err then
     ngx.log(ngx.ERR, "auto-ssl: issuing renewal certificate failed: ", issue_err)
     delete_cert_if_expired(domain, storage, cert)
   end
-
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: issuing renewal certificate done for ", domain)
   renew_check_cert_unlock(domain, storage, local_lock, distributed_lock_value)
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: issuing renewal certificate unlock done for ", domain)
 end
 
 local function renew_all_domains(auto_ssl_instance)
