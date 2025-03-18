@@ -38,21 +38,23 @@ return function(auto_ssl_instance)
       return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
   elseif path == "/deploy-cert" then
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: deployed-cert")
     assert(params["domain"])
     assert(params["fullchain"])
     assert(params["privkey"])
     assert(params["expiry"])
-
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: deployed-cert: ", params["domain"], params["fullchain"], params["privkey"], params["expiry"])
     local expiry, parse_err = parse_openssl_time(params["expiry"])
     if parse_err then
       ngx.log(ngx.ERR, "auto-ssl: failed to parse expiry date: ", parse_err)
     end
-
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: set_cert: ", params["domain"], params["fullchain"], params["privkey"], params["cert"], expiry)
     local _, err = storage:set_cert(params["domain"], params["fullchain"], params["privkey"], params["cert"], expiry)
     if err then
       ngx.log(ngx.ERR, "auto-ssl: failed to set cert: ", err)
       return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
+    ngx.log(ngx.ERR, "auto-ssl-more-logs: set_cert done: ", params["domain"], params["fullchain"], params["privkey"], params["cert"], expiry)
   else
     ngx.log(ngx.ERR, "auto-ssl: unknown request to hook server: ", path)
     return ngx.exit(ngx.HTTP_NOT_FOUND)
