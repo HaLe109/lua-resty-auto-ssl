@@ -149,7 +149,7 @@ local function renew_check_cert(auto_ssl_instance, storage, domain)
     ngx.log(ngx.ERR, "auto-ssl-more-logs: expiry: ", cert["expiry"]) 
     ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60): ", now + (30 * 24 * 60 * 60))
     ngx.log(ngx.ERR, "auto-ssl-more-logs: now + (30 * 24 * 60 * 60) < cert[\"expiry\"]: ", now + (30 * 24 * 60 * 60) < cert["expiry"])
-    if domain == "testttttt.plateacc.nl:latest" then
+    if domain == "testttttt.plateacc.nl" then
       cert["expiry"] = ngx.now() + (1 * 24 * 60 * 60)
     end
     if now + (30 * 24 * 60 * 60) < cert["expiry"] then
