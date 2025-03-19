@@ -98,6 +98,7 @@ local function issue_cert(auto_ssl_instance, storage, domain)
   end
 
   issue_cert_unlock(domain, storage, local_lock, distributed_lock_value)
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: issue_cert done for ", domain, cert["fullchain_pem"], cert["expiry"])
   return cert, err
 end
 

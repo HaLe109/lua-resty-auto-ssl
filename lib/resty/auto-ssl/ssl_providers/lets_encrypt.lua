@@ -23,6 +23,7 @@ function _M.issue_cert(auto_ssl_instance, domain)
   --
   -- Disable dehydrated's locking, since we perform our own domain-specific
   -- locking using the storage adapter.
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: shell_execute: ", domain)
   local result, err = shell_execute({
     "env",
     "HOOK_SECRET=" .. hook_secret,
@@ -36,7 +37,7 @@ function _M.issue_cert(auto_ssl_instance, domain)
     "--config", base_dir .. "/letsencrypt/config",
     "--hook", lua_root .. "/bin/resty-auto-ssl/letsencrypt_hooks",
   })
-
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: shell_execute result: ", result, err)
   -- Cleanup dehydrated files after running to prevent temp files from piling
   -- up. This always runs, regardless of whether or not dehydrated succeeds (in
   -- which case the certs should be installed in storage) or dehydrated fails

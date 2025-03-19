@@ -55,7 +55,7 @@ function _M.set_cert(self, domain, fullchain_pem, privkey_pem, cert_pem, expiry)
   if err then
     return nil, err
   end
-
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: set_cert: ", domain, string)
   -- Store the cert under the "latest" alias, which is what this app will use.
   return self.adapter:set(domain .. ":latest", string)
 end
