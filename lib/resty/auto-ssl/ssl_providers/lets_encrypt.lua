@@ -37,7 +37,7 @@ function _M.issue_cert(auto_ssl_instance, domain)
     "--config", base_dir .. "/letsencrypt/config",
     "--hook", lua_root .. "/bin/resty-auto-ssl/letsencrypt_hooks",
   })
-  ngx.log(ngx.ERR, "auto-ssl-more-logs: shell_execute result: ", result, err)
+  ngx.log(ngx.ERR, "auto-ssl-more-logs: result", result["command"], " status: ", result["status"], " out: ", result["output"], " err: ", err)
   -- Cleanup dehydrated files after running to prevent temp files from piling
   -- up. This always runs, regardless of whether or not dehydrated succeeds (in
   -- which case the certs should be installed in storage) or dehydrated fails
